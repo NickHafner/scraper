@@ -11,6 +11,7 @@ var rootCmd = &cobra.Command{
 	Use:   "scraper",
 	Short: "Web scraper cli tool",
 	Long:  `Todo: Add a description here`,
+
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
