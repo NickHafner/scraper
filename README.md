@@ -4,7 +4,8 @@ This application is a terminal application to assist in web scraping with a main
 
 ## Getting Started
 
-TODO
+- Configuration found in `wails.json`; ref: <https://wails.io/docs/reference/project-config>
+- Start dev with run `wails dev`. You can find the dev server running <http://localhost:34115>
 
 ## Feature Goals
 
