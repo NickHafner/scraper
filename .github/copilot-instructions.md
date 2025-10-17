@@ -28,7 +28,7 @@ Scraped metadata stored in SQLite, raw content in JSON files. Both apps use Wins
 
 ### Component Structure (Expected)
 
-**Backend (`backend/`)**
+**Backend (`server/`)**
 
 - **Entry point**: `src/index.js` (Express.js server + job queue initialization)
 - **Express app**: `src/app.js` (middleware setup, route initialization, Pug template engine)
