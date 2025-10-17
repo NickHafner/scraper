@@ -28,7 +28,7 @@ Scraped metadata stored in SQLite, raw content in JSON files. Both apps use Wins
 
 ### Component Structure (Expected)
 
-**Backend (`scraper-backend/`)**
+**Backend (`backend/`)**
 
 - **Entry point**: `src/index.js` (Express.js server + job queue initialization)
 - **Express app**: `src/app.js` (middleware setup, route initialization, Pug template engine)
@@ -40,10 +40,11 @@ Scraped metadata stored in SQLite, raw content in JSON files. Both apps use Wins
 - **Storage layer**: Dual storage—SQLite for metadata, JSON files for raw scraped content
 - **Logger configuration**: Winston setup for request/error tracking across modules
 
-**Frontend (`scraper-ui/`)**
+**Frontend (`frontend/`)**
 
 - **Entry point**: `src/index.js` / `public/index.html` (React app)
 - **Pages**: Job submission form, job history/status dashboard, results viewer
+- **Routing**: Tanstack Router for client-side navigation
 - **API client**: `src/services/api.js` (centralized backend communication via Ky)
 - **State management**: React hooks or Context API for job state, results cache
 - **Components**: Shadcn/ui components for consistent styling (URL input, job status table, content preview, error boundaries)
