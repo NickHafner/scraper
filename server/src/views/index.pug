@@ -1,0 +1,26 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title PageHoarder
+
+    //- Vite assets (injected based on environment)
+    if isDev
+      script(type="module" src="http://localhost:5173/@vite/client")
+      script(type="module" src="http://localhost:5173/src/main.tsx")
+    else
+      //- Production: include built CSS
+      if cssFile
+        link(rel="stylesheet" href=cssFile)
+      //- Production: include built JS with module preload
+      if jsFile
+        script(type="module" crossorigin src=jsFile)
+
+  body
+    #root
+
+    //- Flash messages or SSR data can be injected here
+    if initialData
+      script.
+        window.__INITIAL_DATA__ = !{JSON.stringify(initialData)};
