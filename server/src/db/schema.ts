@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, primaryKey, index } from 'drizzle-orm/sqlite-core';
 import { relations } from 'drizzle-orm';
 
 // ============ RECIPES ============
@@ -38,7 +38,10 @@ export const sources = sqliteTable('sources', {
   status: text('status', { enum: ['active', 'paused', 'error'] }).default('active'),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
-});
+}, (table) => [
+  index('sources_status_idx').on(table.status),
+  index('sources_recipe_id_idx').on(table.recipeId),
+]);
 
 // ============ ARTICLES ============
 export const articles = sqliteTable('articles', {
@@ -55,7 +58,11 @@ export const articles = sqliteTable('articles', {
   metadata: text('metadata', { mode: 'json' }).$type<Record<string, unknown>>(),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
-});
+}, (table) => [
+  index('articles_source_id_idx').on(table.sourceId),
+  index('articles_archived_at_idx').on(table.archivedAt),
+  index('articles_content_hash_idx').on(table.contentHash),
+]);
 
 // ============ TAGS ============
 export const tags = sqliteTable('tags', {
@@ -70,7 +77,9 @@ export const tags = sqliteTable('tags', {
 export const articleTags = sqliteTable('article_tags', {
   articleId: integer('article_id').references(() => articles.id, { onDelete: 'cascade' }).notNull(),
   tagId: integer('tag_id').references(() => tags.id, { onDelete: 'cascade' }).notNull(),
-});
+}, (table) => [
+  primaryKey({ columns: [table.articleId, table.tagId] }),
+]);
 
 // ============ COLLECTIONS ============
 export const collections = sqliteTable('collections', {
@@ -86,7 +95,9 @@ export const collectionArticles = sqliteTable('collection_articles', {
   collectionId: integer('collection_id').references(() => collections.id, { onDelete: 'cascade' }).notNull(),
   articleId: integer('article_id').references(() => articles.id, { onDelete: 'cascade' }).notNull(),
   position: integer('position').default(0),
-});
+}, (table) => [
+  primaryKey({ columns: [table.collectionId, table.articleId] }),
+]);
 
 // ============ JOBS ============
 export const jobs = sqliteTable('jobs', {
@@ -103,7 +114,11 @@ export const jobs = sqliteTable('jobs', {
   error: text('error'),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
-});
+}, (table) => [
+  index('jobs_source_id_idx').on(table.sourceId),
+  index('jobs_status_idx').on(table.status),
+  index('jobs_bullmq_id_idx').on(table.bullmqId),
+]);
 
 // ============ RELATIONS ============
 export const recipesRelations = relations(recipes, ({ many }) => ({

@@ -1,14 +1,26 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { db } from '../db/index.js';
 import { jobs } from '../db/schema.js';
 import { eq, desc } from 'drizzle-orm';
+import { validate } from '../middleware/validate.js';
 import { AppError } from '../middleware/error-handler.js';
 
 const router = Router();
 
+const idParamSchema = z.object({
+  params: z.object({ id: z.coerce.number().int().positive() }),
+});
+
+const listJobsSchema = z.object({
+  query: z.object({
+    limit: z.coerce.number().min(1).max(100).default(50),
+  }),
+});
+
 // GET /api/jobs - List recent jobs
-router.get('/', async (req, res) => {
-  const limit = parseInt((req.query.limit as string) ?? '50');
+router.get('/', validate(listJobsSchema), async (req, res) => {
+  const { limit } = req.query as unknown as { limit: number };
 
   const result = await db.query.jobs.findMany({
     with: { source: true },
@@ -19,8 +31,8 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/jobs/:id
-router.get('/:id', async (req, res) => {
-  const id = parseInt(req.params.id ?? '');
+router.get('/:id', validate(idParamSchema), async (req, res) => {
+  const { id } = req.params as unknown as { id: number };
   const result = await db.query.jobs.findFirst({
     where: eq(jobs.id, id),
     with: { source: true },
@@ -30,8 +42,8 @@ router.get('/:id', async (req, res) => {
 });
 
 // DELETE /api/jobs/:id - Cancel job
-router.delete('/:id', async (req, res) => {
-  const id = parseInt(req.params.id ?? '');
+router.delete('/:id', validate(idParamSchema), async (req, res) => {
+  const { id } = req.params as unknown as { id: number };
   const job = await db.query.jobs.findFirst({
     where: eq(jobs.id, id),
   });

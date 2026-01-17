@@ -18,8 +18,12 @@ const createSourceSchema = z.object({
   }),
 });
 
+const idParamSchema = z.object({
+  params: z.object({ id: z.coerce.number().int().positive() }),
+});
+
 const updateSourceSchema = z.object({
-  params: z.object({ id: z.coerce.number() }),
+  params: z.object({ id: z.coerce.number().int().positive() }),
   body: z.object({
     name: z.string().min(1).optional(),
     url: z.string().url().optional(),
@@ -45,8 +49,8 @@ router.post('/', validate(createSourceSchema), async (req, res) => {
 });
 
 // GET /api/sources/:id - Get single source
-router.get('/:id', async (req, res) => {
-  const id = parseInt(req.params.id ?? '');
+router.get('/:id', validate(idParamSchema), async (req, res) => {
+  const { id } = req.params as unknown as { id: number };
   const result = await db.query.sources.findFirst({
     where: eq(sources.id, id),
     with: { recipe: true, jobs: { limit: 10 } },
@@ -57,7 +61,7 @@ router.get('/:id', async (req, res) => {
 
 // PUT /api/sources/:id - Update source
 router.put('/:id', validate(updateSourceSchema), async (req, res) => {
-  const id = parseInt(req.params.id ?? '');
+  const { id } = req.params as unknown as { id: number };
   const [result] = await db
     .update(sources)
     .set({ ...req.body, updatedAt: new Date() })
@@ -68,8 +72,8 @@ router.put('/:id', validate(updateSourceSchema), async (req, res) => {
 });
 
 // DELETE /api/sources/:id - Delete source
-router.delete('/:id', async (req, res) => {
-  const id = parseInt(req.params.id ?? '');
+router.delete('/:id', validate(idParamSchema), async (req, res) => {
+  const { id } = req.params as unknown as { id: number };
   const [result] = await db
     .delete(sources)
     .where(eq(sources.id, id))
@@ -79,8 +83,8 @@ router.delete('/:id', async (req, res) => {
 });
 
 // POST /api/sources/:id/run - Trigger scrape job
-router.post('/:id/run', async (req, res) => {
-  const id = parseInt(req.params.id ?? '');
+router.post('/:id/run', validate(idParamSchema), async (req, res) => {
+  const { id } = req.params as unknown as { id: number };
   const source = await db.query.sources.findFirst({
     where: eq(sources.id, id),
   });

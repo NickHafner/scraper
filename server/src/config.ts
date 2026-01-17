@@ -7,6 +7,8 @@ const envSchema = z.object({
   REDIS_URL: z.string().default('redis://localhost:6379'),
   DATABASE_PATH: z.string().default('./data/pagehoarder.db'),
   STORAGE_PATH: z.string().default('./data/archive'),
+  CORS_ORIGIN: z.string().default('http://localhost:5173'),
+  BODY_SIZE_LIMIT: z.string().default('10mb'),
 });
 
 export const config = envSchema.parse(process.env);

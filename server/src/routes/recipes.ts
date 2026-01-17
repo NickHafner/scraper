@@ -29,6 +29,10 @@ const filtersSchema = z.object({
   exclude: z.array(z.string()).optional(),
 });
 
+const idParamSchema = z.object({
+  params: z.object({ id: z.coerce.number().int().positive() }),
+});
+
 const createRecipeSchema = z.object({
   body: z.object({
     name: z.string().min(1),
@@ -63,8 +67,8 @@ router.post('/', validate(createRecipeSchema), async (req, res) => {
 });
 
 // GET /api/recipes/:id
-router.get('/:id', async (req, res) => {
-  const id = parseInt(req.params.id ?? '');
+router.get('/:id', validate(idParamSchema), async (req, res) => {
+  const { id } = req.params as unknown as { id: number };
   const result = await db.query.recipes.findFirst({
     where: eq(recipes.id, id),
   });
@@ -74,7 +78,7 @@ router.get('/:id', async (req, res) => {
 
 // PUT /api/recipes/:id
 router.put('/:id', validate(updateRecipeSchema), async (req, res) => {
-  const id = parseInt(req.params.id ?? '');
+  const { id } = req.params as unknown as { id: number };
   const [result] = await db
     .update(recipes)
     .set({ ...req.body, updatedAt: new Date() })
@@ -85,8 +89,8 @@ router.put('/:id', validate(updateRecipeSchema), async (req, res) => {
 });
 
 // DELETE /api/recipes/:id
-router.delete('/:id', async (req, res) => {
-  const id = parseInt(req.params.id ?? '');
+router.delete('/:id', validate(idParamSchema), async (req, res) => {
+  const { id } = req.params as unknown as { id: number };
   const [result] = await db
     .delete(recipes)
     .where(eq(recipes.id, id))
@@ -96,9 +100,16 @@ router.delete('/:id', async (req, res) => {
 });
 
 // POST /api/recipes/:id/test - Test selectors against a URL
-router.post('/:id/test', async (req, res) => {
-  const id = parseInt(req.params.id ?? '');
-  const { url } = req.body as { url?: string };
+const testRecipeSchema = z.object({
+  params: z.object({ id: z.coerce.number().int().positive() }),
+  body: z.object({
+    url: z.string().url(),
+  }),
+});
+
+router.post('/:id/test', validate(testRecipeSchema), async (req, res) => {
+  const { id } = req.params as unknown as { id: number };
+  const { url } = req.body as { url: string };
 
   const recipe = await db.query.recipes.findFirst({
     where: eq(recipes.id, id),
